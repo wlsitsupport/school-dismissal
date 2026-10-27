@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>地下有蓋操場 - 放學班別即時顯示 (9:16 直向)</title>
+    <title>《放學報班系統》地下有蓋操場 - 放學班別即時顯示 </title>
     <style>
-        /* 設定 9:16 直向滿版版面 */
         html, body {
             width: 100%;
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden; /* 隱藏滾動條，確保畫面完美鎖定 */
+            overflow: hidden;
             background-color: #0f172a;
             color: #ffffff;
             font-family: "Microsoft JhengHei", "PingFang TC", Arial, sans-serif;
@@ -22,64 +21,65 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            padding: 4vh 3vw;
+            padding: 3vh 2vw;
             box-sizing: border-box;
         }
 
-        /* 頂部標題區 (佔用直向螢幕上方空間) */
+        /* 頂部標題區 */
         .header {
             text-align: center;
             width: 100%;
             margin-bottom: 1vh;
         }
         h1 {
-            font-size: 3.5vw;
+            font-size: 3.8vw;
             margin: 0;
             color: #facc15;
             letter-spacing: 2px;
             font-weight: 900;
         }
         .subtitle {
-            font-size: 2vw;
+            font-size: 2.2vw;
             color: #38bdf8;
-            margin-top: 1vh;
+            margin-top: 0.8vh;
             font-weight: bold;
         }
         
-        /* 5 行區域容器：均勻垂直分佈 */
+        /* 5 行區域容器：均勻分佈垂直空間 */
         .rows-container {
             width: 100%;
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: space-around; /* 每行平均等分高度 */
+            justify-content: space-around;
             gap: 1.5vh;
-            margin-top: 2vh;
+            margin-top: 1.5vh;
         }
 
-        /* 每行 Flex 橫向等分排版 */
+        /* 每行 Flex 排版 */
         .grade-row {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 2vw;
+            gap: 1.5vw;
             width: 100%;
-            height: 16%; /* 確保 5 行垂直高度一致 */
+            height: 17%; /* 適當增加每行高度以放大文字 */
         }
 
         /* 班別卡片基礎樣式 */
         .class-card {
-            flex: 1; /* 每行內的班別平均分配寬度 */
+            flex: 1;
             height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
             border-radius: 2vh;
-            font-size: 4vw; /* 針對直向大螢幕優化的超大字體 */
+            font-size: 6vw; /* 放大班名至 6vw，充實整個格子 */
             font-weight: 900;
             text-align: center;
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-sizing: border-box;
+            letter-spacing: 2px;
         }
 
         /* 未到達：暗灰色 */
@@ -87,7 +87,7 @@
             background-color: #1e293b;
             border: 0.4vh solid #334155;
             color: #475569;
-            opacity: 0.6;
+            opacity: 0.5;
         }
 
         /* 已到達：高亮亮綠色 */
@@ -96,22 +96,22 @@
             border: 0.4vh solid #86efac;
             color: #ffffff;
             opacity: 1;
-            transform: scale(1.03);
+            transform: scale(1.02);
             box-shadow: 0 1vh 3vh rgba(34, 197, 94, 0.5);
             animation: popIn 0.3s ease-out;
         }
 
         @keyframes popIn {
             0% { transform: scale(0.85); }
-            50% { transform: scale(1.08); }
-            100% { transform: scale(1.03); }
+            50% { transform: scale(1.06); }
+            100% { transform: scale(1.02); }
         }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <h1>放學集合 (地下有蓋操場)</h1>
+        <h1>《放學報班系統》— 地下有蓋操場</h1>
         <div class="subtitle">綠色代表班別已到達操場</div>
     </div>
 
@@ -134,7 +134,6 @@ const firebaseConfig = {
   measurementId: "G-ET6JXWYSLN"
 };
 
-        // 指定 5 行排列班別結構
         const classRows = [
             ["1信", "1望", "2信", "2望"],
             ["3信", "3望"],
