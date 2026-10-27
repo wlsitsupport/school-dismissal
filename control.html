@@ -5,21 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>放學集合 - 老師控制台 (iPad)</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        .header { text-align: center; margin-bottom: 20px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f2f5; margin: 0; padding: 15px; }
+        .header { text-align: center; margin-bottom: 15px; }
         .header h2 { margin: 0; color: #1a1a1a; font-size: 1.8rem; }
         .header p { color: #666; margin-top: 5px; }
         
-        /* 針對 iPad 點擊優化的網格 */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 15px; max-width: 900px; margin: 0 auto; }
+        /* 5 行區域容器 */
+        .rows-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* 每行 Flex 排版 */
+        .grade-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+        }
+
         .class-btn {
-            padding: 20px 10px; font-size: 1.5rem; font-weight: bold; border: 2px solid #ccc;
-            border-radius: 12px; background: white; color: #333; cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: all 0.2s;
+            flex: 1;
+            padding: 18px 5px;
+            font-size: 1.6rem;
+            font-weight: bold;
+            border: 2px solid #ccc;
+            border-radius: 12px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.2s;
             -webkit-tap-highlight-color: transparent;
         }
-        .class-btn.active { background: #28a745; color: white; border-color: #28a745; transform: scale(0.98); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
-        .footer-tools { text-align: center; margin-top: 30px; }
+        .class-btn.active {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+            transform: scale(0.98);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .footer-tools { text-align: center; margin-top: 25px; }
         .btn-clear { padding: 12px 30px; font-size: 1.2rem; background: #dc3545; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
@@ -30,18 +59,18 @@
         <p>點擊班別即可即時廣播發布 / 取消</p>
     </div>
 
-    <div id="buttonGrid" class="grid"></div>
+    <div id="rowsContainer" class="rows-container"></div>
 
     <div class="footer-tools">
         <button class="btn-clear" onclick="clearAllData()">重設 / 清空所有班別</button>
     </div>
 
-    <!-- 引入 Firebase SDK (相容性最佳的 App 與 Database 模組) -->
+    <!-- 引入 Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <script>
-        // ⚠️ 請務必將下方替換為您在 Firebase Console 取得的資料
+        // ⚠️ 請填入與 index.html 完全相同的 firebaseConfig 金鑰
 const firebaseConfig = {
   apiKey: "AIzaSyBSdMpO9W9iLYGdjeqpghx5M50EQriIIHE",
   authDomain: "school-dismissal-c4251.firebaseapp.com",
@@ -53,29 +82,37 @@ const firebaseConfig = {
   measurementId: "G-ET6JXWYSLN"
 };
 
-        const classList = [
-            "1信", "1望", "2信", "2望", "3信", "3望", 
-            "4信", "4望", "4愛", "5信", "5望", "5愛", 
-            "5勤", "6信", "6望", "6愛", "6勤"
+        const classRows = [
+            ["1信", "1望", "2信", "2望"],
+            ["3信", "3望"],
+            ["4信", "4望", "4愛"],
+            ["5信", "5望", "5愛", "5勤"],
+            ["6信", "6望", "6愛", "6勤"]
         ];
 
         let activeClasses = {};
         let statusRef = null;
 
-        // 1. 初始化頁面按鈕（確保就算 Firebase 連線失敗也能看到按鈕）
         function renderButtons() {
-            const grid = document.getElementById('buttonGrid');
-            grid.innerHTML = '';
-            classList.forEach(cls => {
-                const btn = document.createElement('button');
-                btn.className = `class-btn ${activeClasses[cls] ? 'active' : ''}`;
-                btn.innerText = cls;
-                btn.onclick = () => toggleClass(cls);
-                grid.appendChild(btn);
+            const container = document.getElementById('rowsContainer');
+            container.innerHTML = '';
+
+            classRows.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'grade-row';
+
+                row.forEach(cls => {
+                    const btn = document.createElement('button');
+                    btn.className = `class-btn ${activeClasses[cls] ? 'active' : ''}`;
+                    btn.innerText = cls;
+                    btn.onclick = () => toggleClass(cls);
+                    rowDiv.appendChild(btn);
+                });
+
+                container.appendChild(rowDiv);
             });
         }
 
-        // 2. 切換班別狀態
         function toggleClass(cls) {
             if (activeClasses[cls]) {
                 delete activeClasses[cls];
@@ -84,13 +121,11 @@ const firebaseConfig = {
             }
             renderButtons();
 
-            // 若 Firebase 已成功連線，同步到雲端
             if (statusRef) {
                 statusRef.set(activeClasses);
             }
         }
 
-        // 3. 清空按鈕
         function clearAllData() {
             if (confirm("確定要清空所有已到達的班別嗎？")) {
                 activeClasses = {};
@@ -101,26 +136,21 @@ const firebaseConfig = {
             }
         }
 
-        // 4. 啟動 Firebase 連線
         try {
             if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
                 firebase.initializeApp(firebaseConfig);
                 const db = firebase.database();
                 statusRef = db.ref('dismissal/arrivedClasses');
 
-                // 監聽雲端資料變更
                 statusRef.on('value', (snapshot) => {
                     activeClasses = snapshot.val() || {};
                     renderButtons();
                 });
-            } else {
-                console.warn("尚未設定有效的 firebaseConfig 金鑰，目前僅供本地界面測試。");
             }
         } catch (error) {
             console.error("Firebase 初始化失敗：", error);
         }
 
-        // 頁面開啟時立刻畫出 17 班按鈕
         renderButtons();
     </script>
 </body>

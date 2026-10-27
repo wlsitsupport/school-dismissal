@@ -7,45 +7,56 @@
     <style>
         body {
             font-family: "Microsoft JhengHei", "PingFang TC", Arial, sans-serif;
-            background-color: #0f172a; 
+            background-color: #0f172a;
             color: #ffffff;
-            margin: 0; 
-            padding: 20px 30px; 
-            min-height: 90vh;
-            display: flex; 
-            flex-direction: column; 
+            margin: 0;
+            padding: 20px;
+            min-height: 95vh;
+            display: flex;
+            flex-direction: column;
             align-items: center;
+            box-sizing: border-box;
         }
-        .header { 
-            text-align: center; 
-            margin-bottom: 25px; 
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
         }
-        h1 { 
-            font-size: 3.2rem; 
-            margin: 0; 
-            color: #facc15; 
-            letter-spacing: 2px; 
+        h1 {
+            font-size: 3.2rem;
+            margin: 0;
+            color: #facc15;
+            letter-spacing: 2px;
         }
-        .subtitle { 
-            font-size: 1.8rem; 
-            color: #38bdf8; 
-            margin-top: 8px; 
-            font-weight: bold; 
+        .subtitle {
+            font-size: 1.8rem;
+            color: #38bdf8;
+            margin-top: 5px;
+            font-weight: bold;
         }
         
-        /* 17 班網格佈局 */
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        /* 5 行區域容器 */
+        .rows-container {
+            width: 100%;
+            max-width: 1400px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* 每行 Flex 排版 */
+        .grade-row {
+            display: flex;
+            justify-content: center;
             gap: 20px;
-            width: 95%;
-            max-width: 1500px;
+            width: 100%;
         }
 
         /* 班別卡片基礎樣式 */
         .class-card {
+            flex: 1;
+            max-width: 220px;
             border-radius: 16px;
-            padding: 25px 10px;
+            padding: 20px 10px;
             font-size: 3.2rem;
             font-weight: bold;
             text-align: center;
@@ -53,15 +64,15 @@
             box-sizing: border-box;
         }
 
-        /* 未到達：暗灰色狀態 */
+        /* 未到達：暗灰色 */
         .class-card.pending {
             background-color: #1e293b;
             border: 3px solid #334155;
             color: #64748b;
-            opacity: 0.6;
+            opacity: 0.5;
         }
 
-        /* 已到達：高亮綠色狀態 */
+        /* 已到達：高亮綠色 */
         .class-card.arrived {
             background: linear-gradient(145deg, #15803d, #22c55e);
             border: 3px solid #4ade80;
@@ -86,14 +97,14 @@
         <div class="subtitle">綠色代表班別已到達操場</div>
     </div>
 
-    <div id="displayGrid" class="grid-container"></div>
+    <div id="rowsContainer" class="rows-container"></div>
 
     <!-- 引入 Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <script>
-        // ⚠️ 請填入與 control.html 完全相同的 firebaseConfig 金鑰
+        // ⚠️ 請填入您的 firebaseConfig 金鑰
 const firebaseConfig = {
   apiKey: "AIzaSyBSdMpO9W9iLYGdjeqpghx5M50EQriIIHE",
   authDomain: "school-dismissal-c4251.firebaseapp.com",
@@ -105,46 +116,45 @@ const firebaseConfig = {
   measurementId: "G-ET6JXWYSLN"
 };
 
-        // 固定的 17 班次序列表（按年級與班別）
-        const allClassList = [
-            "1信", "1望", 
-            "2信", "2望", 
-            "3信", "3望", 
-            "4信", "4望", "4愛", 
-            "5信", "5望", "5愛", "5勤", 
-            "6信", "6望", "6愛", "6勤"
+        // 按指定 5 行排列班別
+        const classRows = [
+            ["1信", "1望", "2信", "2望"],
+            ["3信", "3望"],
+            ["4信", "4望", "4愛"],
+            ["5信", "5望", "5愛", "5勤"],
+            ["6信", "6望", "6愛", "6勤"]
         ];
 
         let arrivedClasses = {};
 
-        // 渲染 17 個班別卡片
         function renderDisplay() {
-            const grid = document.getElementById('displayGrid');
-            grid.innerHTML = '';
+            const container = document.getElementById('rowsContainer');
+            container.innerHTML = '';
 
-            allClassList.forEach(cls => {
-                const card = document.createElement('div');
-                const isArrived = arrivedClasses[cls];
+            classRows.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'grade-row';
 
-                // 根據狀態套用 arrived (綠色) 或 pending (暗灰)
-                card.className = `class-card ${isArrived ? 'arrived' : 'pending'}`;
-                card.innerText = cls;
-                
-                grid.appendChild(card);
+                row.forEach(cls => {
+                    const card = document.createElement('div');
+                    const isArrived = arrivedClasses[cls];
+                    card.className = `class-card ${isArrived ? 'arrived' : 'pending'}`;
+                    card.innerText = cls;
+                    rowDiv.appendChild(card);
+                });
+
+                container.appendChild(rowDiv);
             });
         }
 
-        // 初始化頁面預設（全暗灰）
         renderDisplay();
 
-        // 啟動 Firebase 即時數據監聽
         try {
             if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
                 firebase.initializeApp(firebaseConfig);
                 const db = firebase.database();
                 const statusRef = db.ref('dismissal/arrivedClasses');
 
-                // 當 iPad 上有任何更新，大螢幕同步刷新狀態
                 statusRef.on('value', (snapshot) => {
                     arrivedClasses = snapshot.val() || {};
                     renderDisplay();
