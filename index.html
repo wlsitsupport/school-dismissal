@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>地下有蓋操場 - 放學班別即時顯示</title>
+    <!-- 引入 Firebase SDK (v9 模組化 CDN) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // ⚠️ 請貼上與 control.html 完全相同的 firebaseConfig
+        const firebaseConfig = {
+  apiKey: "AIzaSyBSdMpO9W9iLYGdjeqpghx5M50EQriIIHE",
+  authDomain: "school-dismissal-c4251.firebaseapp.com",
+  databaseURL: "https://school-dismissal-c4251-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "school-dismissal-c4251",
+  storageBucket: "school-dismissal-c4251.firebasestorage.app",
+  messagingSenderId: "610659127496",
+  appId: "1:610659127496:web:67b53b52ffa2183bf5d5fd",
+  measurementId: "G-ET6JXWYSLN"
+};
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const statusRef = ref(db, 'dismissal/arrivedClasses');
+
+        // 監聽資料庫，當 iPad 上有任何點擊時，此處會自動即時渲染
+        onValue(statusRef, (snapshot) => {
+            const activeClasses = snapshot.val() || {};
+            const grid = document.getElementById('displayGrid');
+            const classKeys = Object.keys(activeClasses);
+
+            if (classKeys.length === 0) {
+                grid.innerHTML = '<div class="empty-msg">暫無班別到達地下有蓋操場</div>';
+                return;
+            }
+
+            grid.innerHTML = '';
+            classKeys.forEach(cls => {
+                const card = document.createElement('div');
+                card.className = 'class-card';
+                card.innerText = cls;
+                grid.appendChild(card);
+            });
+        });
+    </script>
+    <style>
+        body {
+            font-family: "Microsoft JhengHei", "PingFang TC", Arial, sans-serif;
+            background-color: #0f172a; color: #ffffff;
+            margin: 0; padding: 30px; min-height: 90vh;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .header { text-align: center; margin-bottom: 40px; }
+        h1 { font-size: 3.8rem; margin: 0; color: #facc15; letter-spacing: 2px; }
+        .subtitle { font-size: 2.2rem; color: #38bdf8; margin-top: 10px; font-weight: bold; }
+        
+        .grid-container {
+            display: flex; flex-wrap: wrap; justify-content: center;
+            gap: 25px; width: 95%; max-width: 1600px;
+        }
+        .class-card {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 4px solid #22c55e; border-radius: 20px;
+            padding: 25px 50px; font-size: 4.5rem; font-weight: bold;
+            color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
+            animation: bounceIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .empty-msg { font-size: 2.8rem; color: #64748b; margin-top: 80px; font-weight: bold; }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>已到達 地下有蓋操場 班別</h1>
+        <div class="subtitle">請相關班別家長留意</div>
+    </div>
+
+    <div id="displayGrid" class="grid-container">
+        <div class="empty-msg">載入中...</div>
+    </div>
+
+</body>
+</html>
