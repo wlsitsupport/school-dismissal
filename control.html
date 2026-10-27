@@ -3,72 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>放學集合 - 老師控制台 (iPad)</title>
+    <title>《放學報班系統》- 老師控制台 (iPad)</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f2f5; margin: 0; padding: 15px; padding-bottom: 80px; }
-        .header { text-align: center; margin-bottom: 15px; }
-        .header h2 { margin: 0; color: #1a1a1a; font-size: 1.8rem; }
-        .header p { color: #666; margin-top: 5px; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background: #f0f2f5; 
+            margin: 0; 
+            padding: 20px; 
+            padding-bottom: 90px;
+            box-sizing: border-box;
+        }
+        .header { text-align: center; margin-bottom: 25px; }
+        .header h2 { margin: 0; color: #1a1a1a; font-size: 2rem; }
+        .header p { color: #666; margin-top: 8px; font-size: 1.1rem; }
         
-        /* 5 行區域容器 */
+        /* 5 行區域容器：加大垂直行距 (gap: 22px) */
         .rows-container {
-            max-width: 900px;
+            max-width: 950px;
             margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 22px; 
         }
 
-        /* 每行 Flex 排版 */
+        /* 每行 Flex 排版：加大橫向按鈕間距 (gap: 18px) */
         .grade-row {
             display: flex;
             justify-content: center;
-            gap: 12px;
+            gap: 18px;
             width: 100%;
         }
 
+        /* 按鈕高度與防誤觸優化 */
         .class-btn {
             flex: 1;
-            padding: 20px 5px;
-            font-size: 1.7rem;
+            padding: 26px 10px; /* 拉高按鈕高度，讓手指極易按壓 */
+            font-size: 1.9rem;
             font-weight: bold;
-            border: 2px solid #ccc;
-            border-radius: 12px;
-            background: white;
-            color: #333;
+            border: 3px solid #cbd5e1;
+            border-radius: 16px;
+            background: #ffffff;
+            color: #334155;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: all 0.2s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+            transition: all 0.15s ease-in-out;
             -webkit-tap-highlight-color: transparent;
-        }
-        .class-btn.active {
-            background: #28a745;
-            color: white;
-            border-color: #28a745;
-            transform: scale(0.98);
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+            user-select: none;
         }
 
-        /* 縮小並固定在左下角的重設按鈕 */
+        /* iPad 觸控按下時的反應 */
+        .class-btn:active {
+            transform: scale(0.95);
+            background: #e2e8f0;
+        }
+
+        /* 已選取（亮綠色）狀態：加粗外框與放大，明確區分 */
+        .class-btn.active {
+            background: #22c55e;
+            color: #ffffff;
+            border-color: #15803d;
+            box-shadow: 0 6px 12px rgba(34, 197, 94, 0.35);
+            transform: scale(1.02);
+        }
+
+        /* 固定在左下角的防誤觸重設按鈕 */
         .btn-clear-bottom-left {
             position: fixed;
-            left: 15px;
-            bottom: 15px;
-            padding: 8px 15px;
-            font-size: 0.85rem;
-            background: #6c757d; /* 改用不顯眼的灰色 */
+            left: 20px;
+            bottom: 20px;
+            padding: 10px 18px;
+            font-size: 0.9rem;
+            background: #64748b;
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
-            opacity: 0.7;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            opacity: 0.75;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
             z-index: 999;
         }
         .btn-clear-bottom-left:active {
             opacity: 1;
-            background: #dc3545; /* 點擊時才顯現紅色 */
+            background: #ef4444;
         }
     </style>
 </head>
@@ -81,7 +98,7 @@
 
     <div id="rowsContainer" class="rows-container"></div>
 
-    <!-- 移至左下角的防誤觸重設按鈕 -->
+    <!-- 左下角的防誤觸重設按鈕 -->
     <button class="btn-clear-bottom-left" onclick="clearAllData()">重設 / 清空所有班別</button>
 
     <!-- 引入 Firebase SDK -->
